@@ -36,17 +36,17 @@ const QuoteRow: React.FC<QuoteRowProps> = ({ row, isBuy }) => {
         {size.toLocaleString()}
       </td>
       <td className="px-2 text-right w-1/3">
+        <div
+          className="absolute top-0 right-0 h-full"
+          style={{
+            width: `${percent * 100}%`,
+            backgroundColor: isBuy
+              ? "var(--color-buy-bar)"
+              : "var(--color-sell-bar)",
+          }}
+        />
         <span className="relative z-10">{total.toLocaleString()}</span>
       </td>
-      <div
-        className="absolute top-0 right-0 h-full"
-        style={{
-          width: `${percent * 100}%`,
-          backgroundColor: isBuy
-            ? "var(--color-buy-bar)"
-            : "var(--color-sell-bar)",
-        }}
-      />
     </tr>
   );
 };
