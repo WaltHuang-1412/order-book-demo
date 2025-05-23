@@ -10,34 +10,11 @@ type QuoteRowProps = {
 const QuoteRow: React.FC<QuoteRowProps> = ({ row, isBuy }) => {
   const { price, size, total, percent, status } = row;
   return (
-    <tr
-      className={clsx(
-        "transition-colors duration-500 relative",
-        "hover:bg-[var(--color-row-hover)]",
-        status === "new" &&
-          (isBuy ? "animate-flash-green" : "animate-flash-red")
-      )}
-    >
-      <td
-        className="px-2 text-right w-1/3"
-        style={{
-          color: isBuy ? "var(--color-buy-price)" : "var(--color-sell-price)",
-        }}
-      >
-        {price.toLocaleString()}
-      </td>
-      <td
-        className={clsx(
-          "px-2 text-right w-1/3",
-          status === "changed-up" && "animate-flash-green",
-          status === "changed-down" && "animate-flash-red"
-        )}
-      >
-        {size.toLocaleString()}
-      </td>
-      <td className="px-2 text-right w-1/3">
+    <tr className="relative transition-colors duration-500 hover:bg-[var(--color-row-hover)]">
+      <td colSpan={3} className="p-0 m-0 border-0 relative">
+        {/* 背景條：佔整行寬度 */}
         <div
-          className="absolute top-0 right-0 h-full"
+          className="absolute top-0 right-0 h-full z-0"
           style={{
             width: `${percent * 100}%`,
             backgroundColor: isBuy
@@ -45,7 +22,30 @@ const QuoteRow: React.FC<QuoteRowProps> = ({ row, isBuy }) => {
               : "var(--color-sell-bar)",
           }}
         />
-        <span className="relative z-10">{total.toLocaleString()}</span>
+
+        {/* 三欄資料內容：用 flex 實現對齊 */}
+        <div className="relative z-10 flex text-right text-sm">
+          <div
+            className="w-1/3 px-2"
+            style={{
+              color: isBuy
+                ? "var(--color-buy-price)"
+                : "var(--color-sell-price)",
+            }}
+          >
+            {price.toLocaleString()}
+          </div>
+          <div
+            className={clsx(
+              "w-1/3 px-2",
+              status === "changed-up" && "animate-flash-green",
+              status === "changed-down" && "animate-flash-red"
+            )}
+          >
+            {size.toLocaleString()}
+          </div>
+          <div className="w-1/3 px-2">{total.toLocaleString()}</div>
+        </div>
       </td>
     </tr>
   );
