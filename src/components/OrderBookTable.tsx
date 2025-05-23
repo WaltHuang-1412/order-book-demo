@@ -35,7 +35,10 @@ const QuoteRow: React.FC<QuoteRowProps> = ({ row, isBuy }) => {
           color: isBuy ? "var(--color-buy-price)" : "var(--color-sell-price)",
         }}
       >
-        {price.toLocaleString()}
+        {price.toLocaleString(undefined, {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        })}
       </div>
       <div
         className={clsx(
@@ -67,7 +70,9 @@ export const OrderBookTable: React.FC<OrderBookTableProps> = ({
   return (
     <div className="bg-[var(--color-background)] text-[var(--color-text)] p-2 rounded-md w-full">
       {/* Header */}
-      <div className="text-lg font-bold mb-2 border-b-purple-100">Order Book</div>
+      <div className="text-lg font-bold mb-2 border-b-purple-100">
+        Order Book
+      </div>
       <div className="flex text-[var(--color-head)] text-sm font-medium">
         <div className="w-1/3 px-2 text-right">Price</div>
         <div className="w-1/3 px-2 text-right">Size</div>

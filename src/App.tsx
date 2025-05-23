@@ -6,7 +6,7 @@ export default function App() {
   const { bids, asks } = useOrderBookFeed();
   const { lastPrice, direction } = useLastPriceSocket();
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center w-full h-full items-center">
       <OrderBookTable
         bids={bids.slice(0, 8)}
         asks={asks.slice(0, 8)}
