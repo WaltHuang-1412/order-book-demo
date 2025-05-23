@@ -10,44 +10,44 @@ type QuoteRowProps = {
 const QuoteRow: React.FC<QuoteRowProps> = ({ row, isBuy }) => {
   const { price, size, total, percent, status } = row;
   return (
-    <tr className="relative transition-colors duration-500 hover:bg-[var(--color-row-hover)]">
-      <td colSpan={3} className="p-0 m-0 border-0 relative">
-        {/* 背景條：佔整行寬度 */}
-        <div
-          className="absolute top-0 right-0 h-full z-0"
-          style={{
-            width: `${percent * 100}%`,
-            backgroundColor: isBuy
-              ? "var(--color-buy-bar)"
-              : "var(--color-sell-bar)",
-          }}
-        />
+    <div
+      className={clsx(
+        "relative flex w-full text-right text-sm",
+        "transition-colors duration-500 hover:bg-[var(--color-row-hover)]",
+        status === "new" &&
+          (isBuy ? "animate-flash-green" : "animate-flash-red")
+      )}
+    >
+      {/* 背景條 */}
+      <div
+        className="absolute top-0 right-0 h-full z-0"
+        style={{
+          width: `${percent * 100}%`,
+          backgroundColor: isBuy
+            ? "var(--color-buy-bar)"
+            : "var(--color-sell-bar)",
+        }}
+      />
 
-        {/* 三欄資料內容：用 flex 實現對齊 */}
-        <div className="relative z-10 flex text-right text-sm">
-          <div
-            className="w-1/3 px-2"
-            style={{
-              color: isBuy
-                ? "var(--color-buy-price)"
-                : "var(--color-sell-price)",
-            }}
-          >
-            {price.toLocaleString()}
-          </div>
-          <div
-            className={clsx(
-              "w-1/3 px-2",
-              status === "changed-up" && "animate-flash-green",
-              status === "changed-down" && "animate-flash-red"
-            )}
-          >
-            {size.toLocaleString()}
-          </div>
-          <div className="w-1/3 px-2">{total.toLocaleString()}</div>
-        </div>
-      </td>
-    </tr>
+      <div
+        className="w-1/3 px-2 relative z-10"
+        style={{
+          color: isBuy ? "var(--color-buy-price)" : "var(--color-sell-price)",
+        }}
+      >
+        {price.toLocaleString()}
+      </div>
+      <div
+        className={clsx(
+          "w-1/3 px-2 relative z-10",
+          status === "changed-up" && "animate-flash-green",
+          status === "changed-down" && "animate-flash-red"
+        )}
+      >
+        {size.toLocaleString()}
+      </div>
+      <div className="w-1/3 px-2 relative z-10">{total.toLocaleString()}</div>
+    </div>
   );
 };
 
@@ -65,47 +65,45 @@ export const OrderBookTable: React.FC<OrderBookTableProps> = ({
   direction,
 }) => {
   return (
-    <div className="bg-[var(--color-background)] text-[var(--color-text)] p-4 rounded-md w-full max-w-md">
-      <table className="w-full border-collapse text-sm">
-        <thead className="text-[var(--color-head)]">
-          <tr>
-            <th className="text-right px-2">Price</th>
-            <th className="text-right px-2">Size</th>
-            <th className="text-right px-2">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {asks.map((row) => (
-            <QuoteRow key={`ask-${row.price}`} row={row} isBuy={false} />
-          ))}
+    <div className="bg-[var(--color-background)] text-[var(--color-text)] p-2 rounded-md w-full">
+      {/* Header */}
+      <div className="text-lg font-bold mb-2 border-b-purple-100">Order Book</div>
+      <div className="flex text-[var(--color-head)] text-sm font-medium">
+        <div className="w-1/3 px-2 text-right">Price</div>
+        <div className="w-1/3 px-2 text-right">Size</div>
+        <div className="w-1/3 px-2 text-right">Total</div>
+      </div>
 
-          {lastPrice !== undefined && (
-            <tr>
-              <td colSpan={3} className="py-1">
-                <div
-                  className={clsx(
-                    "text-center font-semibold text-lg py-1 rounded",
-                    direction === "up" &&
-                      "text-[var(--color-buy-price)] bg-[var(--color-buy-bar)]",
-                    direction === "down" &&
-                      "text-[var(--color-sell-price)] bg-[var(--color-sell-bar)]",
-                    direction === "flat" &&
-                      "text-[var(--color-flat-text)] bg-[var(--color-flat-bar)]"
-                  )}
-                >
-                  {lastPrice?.toLocaleString() ?? "--"}
-                  {direction === "up" && " ↑"}
-                  {direction === "down" && " ↓"}
-                </div>
-              </td>
-            </tr>
-          )}
+      {/* Ask Rows */}
+      {asks.map((row) => (
+        <QuoteRow key={`ask-${row.price}`} row={row} isBuy={false} />
+      ))}
 
-          {bids.map((row) => (
-            <QuoteRow key={`bid-${row.price}`} row={row} isBuy={true} />
-          ))}
-        </tbody>
-      </table>
+      {/* Last Price Row */}
+      {lastPrice !== undefined && (
+        <div className="py-1">
+          <div
+            className={clsx(
+              "text-center font-semibold text-lg py-1 rounded",
+              direction === "up" &&
+                "text-[var(--color-buy-price)] bg-[var(--color-buy-bar)]",
+              direction === "down" &&
+                "text-[var(--color-sell-price)] bg-[var(--color-sell-bar)]",
+              direction === "flat" &&
+                "text-[var(--color-text)] bg-[rgba(134,152,170,0.12)]"
+            )}
+          >
+            {lastPrice?.toLocaleString() ?? "--"}
+            {direction === "up" && " ↑"}
+            {direction === "down" && " ↓"}
+          </div>
+        </div>
+      )}
+
+      {/* Bid Rows */}
+      {bids.map((row) => (
+        <QuoteRow key={`bid-${row.price}`} row={row} isBuy={true} />
+      ))}
     </div>
   );
 };
