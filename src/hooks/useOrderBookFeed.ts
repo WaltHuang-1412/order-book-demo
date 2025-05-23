@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { type QuoteRow, transformQuotes } from "../utils/transformQuotes";
-import throttle from "lodash-es/throttle"
+import {
+  transformBidsWithStatus,
+  transformAsksWithStatus,
+  type QuoteRow,
+} from "../utils/transformQuotesWithStatus";
 
 type QuoteMap = Map<string, string>;
 
@@ -13,14 +16,6 @@ export function useOrderBookFeed() {
   const lastSeqNumRef = useRef<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
-  // ✅ 加入 throttle：每 200ms 最多更新一次畫面
-  const throttledUpdate = useRef(
-    throttle(() => {
-      setBids(transformQuotes([...bidMapRef.current.entries()], true));
-      setAsks(transformQuotes([...askMapRef.current.entries()], false));
-    }, 200)
-  ).current;
-
   useEffect(() => {
     const ws = new WebSocket("wss://ws.btse.com/ws/oss/futures");
     wsRef.current = ws;
@@ -31,7 +26,6 @@ export function useOrderBookFeed() {
 
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
-
       if (msg.topic !== "update:BTCPFC_0" || !msg.data) return;
       const data = msg.data;
 
@@ -40,42 +34,36 @@ export function useOrderBookFeed() {
         askMapRef.current = new Map(data.asks);
         lastSeqNumRef.current = data.seqNum;
 
-        setBids(transformQuotes([...bidMapRef.current.entries()], true));
-        setAsks(transformQuotes([...askMapRef.current.entries()], false));
+        setBids(transformBidsWithStatus([...bidMapRef.current.entries()]));
+        setAsks(transformAsksWithStatus([...askMapRef.current.entries()]));
         return;
       }
 
       if (data.type === "delta") {
         const { seqNum, prevSeqNum, bids: deltaBids, asks: deltaAsks } = data;
-
         if (prevSeqNum !== lastSeqNumRef.current) {
-          console.warn("⚠️ SEQ mismatch. Re-subscribing...");
           resubscribe();
           return;
         }
 
         lastSeqNumRef.current = seqNum;
 
-        applyDelta(bidMapRef.current, deltaBids);
-        applyDelta(askMapRef.current, deltaAsks);
+        const bidChanges = applyDeltaWithStatus(bidMapRef.current, deltaBids);
+        const askChanges = applyDeltaWithStatus(askMapRef.current, deltaAsks);
 
-        // ✅ 改用 throttle 更新畫面
-        throttledUpdate();
+        setBids(
+          transformBidsWithStatus([...bidMapRef.current.entries()], bidChanges)
+        );
+        setAsks(
+          transformAsksWithStatus([...askMapRef.current.entries()], askChanges)
+        );
       }
     };
 
     return () => {
       ws.close();
-      throttledUpdate.cancel();
     };
-  }, [throttledUpdate]);
-
-  function applyDelta(map: QuoteMap, deltas: [string, string][]) {
-    for (const [price, size] of deltas) {
-      if (size === "0") map.delete(price);
-      else map.set(price, size);
-    }
-  }
+  }, []);
 
   function resubscribe() {
     const ws = wsRef.current;
@@ -91,5 +79,45 @@ export function useOrderBookFeed() {
     setAsks([]);
   }
 
+  function applyDeltaWithStatus(
+    map: QuoteMap,
+    deltas: [string, string][]
+  ): Record<
+    string,
+    "new" | "changed-up" | "changed-down" | "unchanged" | "removed"
+  > {
+    const statusMap: Record<
+      string,
+      "new" | "changed-up" | "changed-down" | "unchanged" | "removed"
+    > = {};
+
+    for (const [price, size] of deltas) {
+      const exists = map.has(price);
+      const prevSize = map.get(price); // string | undefined
+
+      if (size === "0") {
+        if (exists) {
+          map.delete(price);
+          statusMap[price] = "removed";
+        }
+      } else {
+        const sizeFloat = parseFloat(size);
+        const prevFloat = prevSize ? parseFloat(prevSize) : null;
+
+        if (!exists) {
+          statusMap[price] = "new";
+        } else if (prevFloat !== null && sizeFloat !== prevFloat) {
+          statusMap[price] =
+            sizeFloat > prevFloat ? "changed-up" : "changed-down";
+        } else {
+          statusMap[price] = "unchanged";
+        }
+
+        map.set(price, size);
+      }
+    }
+
+    return statusMap;
+  }
   return { bids, asks };
 }

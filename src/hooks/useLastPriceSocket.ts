@@ -21,8 +21,6 @@ export function useLastPriceSocket() {
     };
 
     ws.onmessage = (event) => {
-      console.log("📥 WS raw data:", event.data);
-
       try {
         const msg = JSON.parse(event.data);
 
