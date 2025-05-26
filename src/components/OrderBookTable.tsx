@@ -32,7 +32,7 @@ const QuoteRow: React.FC<QuoteRowProps> = ({ row, isBuy }) => {
       />
 
       <div
-        className="w-3/12 px-2 text-left"
+        className="w-3/12 pl-2 text-left"
         style={{
           color: isBuy ? "var(--color-buy-price)" : "var(--color-sell-price)",
         }}
@@ -44,14 +44,14 @@ const QuoteRow: React.FC<QuoteRowProps> = ({ row, isBuy }) => {
       </div>
       <div
         className={clsx(
-          "w-3/12 px-2 text-right",
+          "w-4/12 pl-2 text-right",
           status === "changed-up" && "animate-flash-green",
           status === "changed-down" && "animate-flash-red"
         )}
       >
         {size.toLocaleString()}
       </div>
-      <div className="w-6/12 pl-2 text-right">{total.toLocaleString()}</div>
+      <div className="w-5/12 pl-2 text-right">{total.toLocaleString()}</div>
     </div>
   );
 };
@@ -76,9 +76,9 @@ export const OrderBookTable: React.FC<OrderBookTableProps> = ({
         Order Book
       </div>
       <div className="flex text-[var(--color-head)] text-sm font-medium">
-        <div className="w-3/12 px-2 text-left">Price (USD)</div>
-        <div className="w-3/12 px-2 text-right">Size</div>
-        <div className="w-6/12 pl-2 text-right">Total</div>
+        <div className="w-3/12 pl-2 text-left">Price (USD)</div>
+        <div className="w-4/12 pl-2 text-right">Size</div>
+        <div className="w-5/12 pl-2 text-right">Total</div>
       </div>
 
       {/* Ask Rows */}
