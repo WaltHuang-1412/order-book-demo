@@ -32,6 +32,7 @@ export function useOrderBookFeed() {
       if (data.type === "snapshot") {
         bidMapRef.current = new Map(data.bids);
         askMapRef.current = new Map(data.asks);
+
         lastSeqNumRef.current = data.seqNum;
 
         setBids(transformBidsWithStatus([...bidMapRef.current.entries()]));
@@ -93,27 +94,28 @@ export function useOrderBookFeed() {
 
     for (const [price, size] of deltas) {
       const exists = map.has(price);
-      const prevSize = map.get(price); // string | undefined
+      const prevSizeStr = map.get(price); // 之前該價格的 size 字串
 
       if (size === "0") {
+        // 表示該價格層級掛單取消
         if (exists) {
           map.delete(price);
           statusMap[price] = "removed";
         }
       } else {
         const sizeFloat = parseFloat(size);
-        const prevFloat = prevSize ? parseFloat(prevSize) : null;
+        const prevSizeFloat = prevSizeStr ? parseFloat(prevSizeStr) : null;
 
         if (!exists) {
           statusMap[price] = "new";
-        } else if (prevFloat !== null && sizeFloat !== prevFloat) {
+        } else if (prevSizeFloat !== null && sizeFloat !== prevSizeFloat) {
           statusMap[price] =
-            sizeFloat > prevFloat ? "changed-up" : "changed-down";
+            sizeFloat > prevSizeFloat ? "changed-up" : "changed-down";
         } else {
           statusMap[price] = "unchanged";
         }
 
-        map.set(price, size);
+        map.set(price, size); // 更新本地快取
       }
     }
 
