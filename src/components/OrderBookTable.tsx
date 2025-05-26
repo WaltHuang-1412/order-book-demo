@@ -12,16 +12,18 @@ const QuoteRow: React.FC<QuoteRowProps> = ({ row, isBuy }) => {
   return (
     <div
       className={clsx(
-        "relative flex w-full text-right text-sm",
+        "relative flex w-full text-sm pt-1 pb-1",
         "transition-colors duration-500 hover:bg-[var(--color-row-hover)]",
         status === "new" &&
           (isBuy ? "animate-flash-green" : "animate-flash-red")
       )}
     >
-      {/* 背景條 */}
+      {/* 背景條，注意這裡設定 top & bottom 為 4% 留邊 */}
       <div
-        className="absolute top-0 right-0 h-full z-0"
+        className="absolute right-0"
         style={{
+          top: "4%",
+          bottom: "4%",
           width: `${percent * 100}%`,
           backgroundColor: isBuy
             ? "var(--color-buy-bar)"
@@ -30,7 +32,7 @@ const QuoteRow: React.FC<QuoteRowProps> = ({ row, isBuy }) => {
       />
 
       <div
-        className="w-1/3 px-2 relative z-10"
+        className="w-3/12 px-2 text-left"
         style={{
           color: isBuy ? "var(--color-buy-price)" : "var(--color-sell-price)",
         }}
@@ -42,14 +44,14 @@ const QuoteRow: React.FC<QuoteRowProps> = ({ row, isBuy }) => {
       </div>
       <div
         className={clsx(
-          "w-1/3 px-2 relative z-10",
+          "w-3/12 px-2 text-right",
           status === "changed-up" && "animate-flash-green",
           status === "changed-down" && "animate-flash-red"
         )}
       >
         {size.toLocaleString()}
       </div>
-      <div className="w-1/3 px-2 relative z-10">{total.toLocaleString()}</div>
+      <div className="w-6/12 pl-2 text-right">{total.toLocaleString()}</div>
     </div>
   );
 };
@@ -74,9 +76,9 @@ export const OrderBookTable: React.FC<OrderBookTableProps> = ({
         Order Book
       </div>
       <div className="flex text-[var(--color-head)] text-sm font-medium">
-        <div className="w-1/3 px-2 text-right">Price</div>
-        <div className="w-1/3 px-2 text-right">Size</div>
-        <div className="w-1/3 px-2 text-right">Total</div>
+        <div className="w-3/12 px-2 text-left">Price (USD)</div>
+        <div className="w-3/12 px-2 text-right">Size</div>
+        <div className="w-6/12 pl-2 text-right">Total</div>
       </div>
 
       {/* Ask Rows */}
