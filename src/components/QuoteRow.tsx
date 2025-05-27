@@ -13,7 +13,7 @@ export const QuoteRow: React.FC<QuoteRowProps> = ({ row, isBuy }) => {
   return (
     <div
       className={clsx(
-        "relative flex w-full text-sm",
+        "relative flex w-full text-sm px-2",
         "transition-colors duration-500 hover:bg-[var(--color-row-hover)]",
         status === "new" &&
           (isBuy ? "animate-flash-green" : "animate-flash-red")

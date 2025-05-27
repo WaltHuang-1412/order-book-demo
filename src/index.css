@@ -13,6 +13,10 @@
   --color-buy-price: #00b15d;
   --color-sell-price: #FF5B5A;
 
+  /* SVG color filters */
+  --color-buy-price-filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(118deg) brightness(118%) contrast(119%);
+  --color-sell-price-filter: invert(37%) sepia(93%) saturate(1352%) hue-rotate(314deg) brightness(101%) contrast(101%);
+
   /* Percent bar background (accumulative size) */
   --color-buy-bar: rgba(16, 186, 104, 0.12);
   --color-sell-bar: rgba(255, 90, 90, 0.12);

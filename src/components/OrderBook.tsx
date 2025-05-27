@@ -15,9 +15,9 @@ export const OrderBook: React.FC<Props> = ({
   lastPrice,
   direction,
 }) => (
-  <div className="bg-[var(--color-background)] text-[var(--color-text)] p-2 rounded-md w-full">
-    <div className="text-lg font-bold mb-2 border-b-purple-100">Order Book</div>
-    <div className="flex text-[var(--color-head)] text-sm font-medium">
+  <div className="bg-[var(--color-background)] text-[var(--color-text)] py-2 rounded-md w-full">
+    <div className="text-lg font-bold mb-2 border-b-purple-100 px-2">Order Book</div>
+    <div className="flex text-[var(--color-head)] text-sm font-medium px-2">
       <div className="w-3/12 pt-1 pb-1 text-left">Price (USD)</div>
       <div className="w-4/12 pl-2 pt-1 pb-1 text-right">Size</div>
       <div className="w-5/12 pl-2 pt-1 pb-1 text-right">Total</div>
