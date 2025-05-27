@@ -1,67 +1,68 @@
 import { useEffect, useRef, useState } from "react";
+import { WebSocketClient } from "../utils/wsClient";
 
-type PriceDirection = "up" | "down" | "flat" | null;
+export type PriceDirection = "up" | "down" | "flat" | null;
 
 export function useLastPriceSocket() {
   const [lastPrice, setLastPrice] = useState<number | null>(null);
   const [direction, setDirection] = useState<PriceDirection>(null);
-  const prevPriceRef = useRef<number | null>(null);
+  const prevPrice = useRef<number | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket("wss://ws.btse.com/ws/futures");
+    const ws = new WebSocketClient("wss://ws.btse.com/ws/futures");
 
-    ws.onopen = () => {
-      console.log("✅ WS opened");
-      ws.send(
-        JSON.stringify({
-          op: "subscribe",
-          args: ["tradeHistoryApi:BTCPFC"],
-        })
-      );
+    const handleOpen = () => {
+      console.log("[LastPrice WS] connected");
+      ws.send({
+        op: "subscribe",
+        args: ["tradeHistoryApi:BTCPFC"],
+      });
     };
 
-    ws.onmessage = (event) => {
+    const handleMessage = (event: MessageEvent) => {
       try {
         const msg = JSON.parse(event.data);
 
         if (msg.event === "subscribe") {
-          console.log("✅ Subscribed to", msg.channel);
+          console.log("[LastPrice WS] subscribed to", msg.channel);
           return;
         }
 
-        if (msg.topic === "tradeHistoryApi") {
-          if (!Array.isArray(msg.data) || msg.data.length === 0) {
-            console.log("⚠️ data is empty array");
-            return;
-          }
+        if (msg.topic !== "tradeHistoryApi:BTCPFC") return;
+        if (!Array.isArray(msg.data) || msg.data.length === 0) return;
 
-          const price = parseFloat(msg.data[0].price);
-          const prev = prevPriceRef.current;
+        const price = parseFloat(msg.data[0].price);
+        const prev = prevPrice.current;
 
-          let dir: PriceDirection = "flat";
-          if (prev !== null) {
-            if (price > prev) dir = "up";
-            else if (price < prev) dir = "down";
-          }
-
-          console.log("📈 price:", price, "| prev:", prev, "| dir:", dir);
-
-          prevPriceRef.current = price;
-          setLastPrice(price);
-          setDirection(dir);
+        let dir: PriceDirection = "flat";
+        if (prev !== null) {
+          if (price > prev) dir = "up";
+          else if (price < prev) dir = "down";
         }
-      } catch (e) {
-        console.error("❌ LastPrice parse error", e);
+
+        prevPrice.current = price;
+        setLastPrice(price);
+        setDirection(dir);
+      } catch (err) {
+        console.error("[LastPrice WS] parse error:", err);
       }
     };
 
-    ws.onerror = (err) => {
-      console.error("❌ WebSocket error", err);
-    };
+    ws.on("open", handleOpen);
+    ws.on("message", handleMessage);
+
+    ws.on("error", (e) => {
+      console.error("[LastPrice WS] connection error:", e);
+    });
+
+    ws.on("close", () => {
+      console.log("[LastPrice WS] disconnected");
+    });
 
     return () => {
+      ws.off("open", handleOpen);
+      ws.off("message", handleMessage);
       ws.close();
-      console.log("🛑 WS closed");
     };
   }, []);
 

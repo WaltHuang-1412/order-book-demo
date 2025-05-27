@@ -4,6 +4,7 @@ import {
   transformAsksWithStatus,
   type QuoteRow,
 } from "../utils/transformQuotesWithStatus";
+import { WebSocketClient } from "../utils/wsClient";
 
 type QuoteMap = Map<string, string>;
 
@@ -14,19 +15,18 @@ export function useOrderBookFeed() {
   const bidMapRef = useRef<QuoteMap>(new Map());
   const askMapRef = useRef<QuoteMap>(new Map());
   const lastSeqNumRef = useRef<number | null>(null);
-  const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const ws = new WebSocket("wss://ws.btse.com/ws/oss/futures");
-    wsRef.current = ws;
+    const ws = new WebSocketClient("wss://ws.btse.com/ws/oss/futures");
 
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ op: "subscribe", args: ["update:BTCPFC_0"] }));
+    const handleOpen = () => {
+      ws.send({ op: "subscribe", args: ["update:BTCPFC_0"] });
     };
 
-    ws.onmessage = (event) => {
+    const handleMessage = (event: MessageEvent) => {
       const msg = JSON.parse(event.data);
       if (msg.topic !== "update:BTCPFC_0" || !msg.data) return;
+
       const data = msg.data;
 
       if (data.type === "snapshot") {
@@ -43,7 +43,7 @@ export function useOrderBookFeed() {
       if (data.type === "delta") {
         const { seqNum, prevSeqNum, bids: deltaBids, asks: deltaAsks } = data;
         if (prevSeqNum !== lastSeqNumRef.current) {
-          resubscribe();
+          resubscribe(ws);
           return;
         }
 
@@ -61,17 +61,21 @@ export function useOrderBookFeed() {
       }
     };
 
+    ws.on("open", handleOpen);
+    ws.on("message", handleMessage);
+
     return () => {
+      ws.off("open", handleOpen);
+      ws.off("message", handleMessage);
       ws.close();
     };
   }, []);
 
-  function resubscribe() {
-    const ws = wsRef.current;
-    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  function resubscribe(ws: WebSocketClient) {
+    if (ws.getState() !== WebSocket.OPEN) return;
 
-    ws.send(JSON.stringify({ op: "unsubscribe", args: ["update:BTCPFC_0"] }));
-    ws.send(JSON.stringify({ op: "subscribe", args: ["update:BTCPFC_0"] }));
+    ws.send({ op: "unsubscribe", args: ["update:BTCPFC_0"] });
+    ws.send({ op: "subscribe", args: ["update:BTCPFC_0"] });
 
     bidMapRef.current.clear();
     askMapRef.current.clear();
@@ -94,10 +98,9 @@ export function useOrderBookFeed() {
 
     for (const [price, size] of deltas) {
       const exists = map.has(price);
-      const prevSizeStr = map.get(price); // 之前該價格的 size 字串
+      const prevSizeStr = map.get(price);
 
       if (size === "0") {
-        // 表示該價格層級掛單取消
         if (exists) {
           map.delete(price);
           statusMap[price] = "removed";
@@ -115,11 +118,12 @@ export function useOrderBookFeed() {
           statusMap[price] = "unchanged";
         }
 
-        map.set(price, size); // 更新本地快取
+        map.set(price, size);
       }
     }
 
     return statusMap;
   }
+
   return { bids, asks };
 }
