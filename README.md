@@ -1,54 +1,66 @@
-# React + TypeScript + Vite
+# Order Book Demo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一個即時訂單簿（Order Book）的示範專案，使用 React + TypeScript + Vite 開發。
 
-Currently, two official plugins are available:
+## 功能特點
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 即時顯示買賣盤口數據
+- 價格變動動畫效果
+- 自適應深色主題
+- WebSocket 即時數據更新
+- 響應式設計
 
-## Expanding the ESLint configuration
+## 技術棧
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- WebSocket
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 開始使用
+
+### 安裝依賴
+
+```bash
+yarn
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 開發模式
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+yarn dev
 ```
+
+### 建置專案
+
+```bash
+yarn build
+```
+
+## 專案結構
+
+```
+src/
+├── assets/        # 靜態資源
+├── components/    # React 組件
+├── utils/         # 工具函數
+└── App.tsx        # 主應用組件
+```
+
+## 主要組件
+
+- `LastPriceBar`: 最新價格顯示
+- `OrderBook`: 訂單簿主體
+- `WebSocketClient`: WebSocket 連接管理
+
+
+## 開發說明
+
+1. WebSocket 連接管理在 `src/utils/wsClient.ts`
+2. 訂單簿邏輯在 `src/components/OrderBook.tsx`
+3. 價格顯示組件在 `src/components/LastPriceBar.tsx`
+
+## 授權
+
+MIT License

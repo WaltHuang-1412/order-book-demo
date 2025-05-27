@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import ArrowDownIcon from "../assets/icons/ArrowDownIcon.svg?react";
-console.log("ArrowDownIcon :>> ", ArrowDownIcon);
+
 type Props = {
   price?: number | null;
   direction?: "up" | "down" | "flat" | null;
@@ -9,7 +9,7 @@ type Props = {
 export const LastPriceBar: React.FC<Props> = ({ price, direction }) => (
   <div
     className={clsx(
-      "py-2 rounded my-1",
+      "py-1 rounded my-1",
       direction === "up" &&
         "text-[var(--color-buy-price)] bg-[var(--color-buy-bar)]",
       direction === "down" &&
