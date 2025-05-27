@@ -22,14 +22,14 @@ export function useLastPriceSocket() {
     const handleMessage = (event: MessageEvent) => {
       try {
         const msg = JSON.parse(event.data);
-
         if (msg.event === "subscribe") {
           console.log("[LastPrice WS] subscribed to", msg.channel);
           return;
         }
 
-        if (msg.topic !== "tradeHistoryApi:BTCPFC") return;
+        if (msg.topic !== "tradeHistoryApi") return;
         if (!Array.isArray(msg.data) || msg.data.length === 0) return;
+        if (msg.data[0].symbol !== "BTCPFC") return;
 
         const price = parseFloat(msg.data[0].price);
         const prev = prevPrice.current;
